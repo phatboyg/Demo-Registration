@@ -3,6 +3,7 @@
     using System.Configuration;
     using MassTransit;
     using MassTransit.AzureServiceBusTransport;
+    using Registration.Consumers;
     using Topshelf;
     using Topshelf.Logging;
 
@@ -27,6 +28,15 @@
                 cfg.ReceiveEndpoint(host, ConfigurationManager.AppSettings["ProcessRegistrationQueueName"], e =>
                 {
                     e.PrefetchCount = 16;
+
+                    e.Consumer<SubmitRegistrationConsumer>();
+                });
+
+                cfg.ReceiveEndpoint(host, ConfigurationManager.AppSettings["SubmitRegistrationQueueName"], e =>
+                {
+                    e.PrefetchCount = 16;
+
+                    e.Consumer<SubmitRegistrationConsumer>();
                 });
             });
 

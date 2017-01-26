@@ -1,5 +1,6 @@
 ﻿namespace Registration.Activities.LicenseVerification
 {
+    using System;
     using System.Threading.Tasks;
     using MassTransit.Courier;
 
@@ -7,9 +8,16 @@
     public class LicenseVerificationActivity :
         ExecuteActivity<LicenseVerificiationArguments>
     {
-        public Task<ExecutionResult> Execute(ExecuteContext<LicenseVerificiationArguments> context)
+        public async Task<ExecutionResult> Execute(ExecuteContext<LicenseVerificiationArguments> context)
         {
-            throw new System.NotImplementedException();
+            // verify license with remote service
+
+            var expirationDate = DateTime.Today + TimeSpan.FromDays(90);
+
+            return context.CompletedWithVariables(new
+            {
+                LicenseExpirationDate = expirationDate
+            });
         }
     }
 }

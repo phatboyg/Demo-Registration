@@ -1,6 +1,8 @@
 ﻿namespace StateService
 {
+    using System;
     using System.Configuration;
+    using System.Linq;
     using Automatonymous;
     using GreenPipes;
     using MassTransit;
@@ -28,6 +30,8 @@
                 var host = cfg.Host(ConfigurationManager.AppSettings["Microsoft.ServiceBus.ConnectionString"], h =>
                 {
                 });
+
+                EndpointConvention.Map<ProcessRegistration>(GetDestinationAddress(host, ConfigurationManager.AppSettings["ProcessRegistrationQueueName"]));
 
                 cfg.ReceiveEndpoint(host, ConfigurationManager.AppSettings["RegistrationStateQueueName"], e =>
                 {
@@ -59,6 +63,21 @@
             _busControl?.Stop();
 
             return true;
+        }
+
+        public Uri GetDestinationAddress(IServiceBusHost host, string queueName)
+        {
+            var segments = new[] {host.Settings.ServiceUri.AbsolutePath.Trim('/'), queueName.Trim('/')}
+                .Where(x => x.Length > 0);
+
+            var builder = new UriBuilder
+            {
+                Scheme = host.Settings.ServiceUri.Scheme,
+                Host = host.Settings.ServiceUri.Host,
+                Path = string.Join("/", segments)
+            };
+
+            return builder.Uri;
         }
     }
 }

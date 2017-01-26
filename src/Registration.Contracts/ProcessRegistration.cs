@@ -1,7 +1,13 @@
-﻿namespace Registration.Activities.EventRegistration
+﻿namespace Registration.Contracts
 {
-    public interface EventRegistrationArguments
+    using System;
+
+
+    public interface ProcessRegistration
     {
+        Guid SubmissionId { get; }
+        DateTime Timestamp { get; }
+
         string ParticipantEmailAddress { get; }
         string ParticipantLicenseNumber { get; }
         string ParticipantCategory { get; }

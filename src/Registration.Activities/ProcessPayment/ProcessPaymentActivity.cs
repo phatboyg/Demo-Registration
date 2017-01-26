@@ -1,5 +1,6 @@
 ﻿namespace Registration.Activities.ProcessPayment
 {
+    using System;
     using System.Threading.Tasks;
     using MassTransit.Courier;
 
@@ -7,14 +8,32 @@
     public class ProcessPaymentActivity :
         Activity<ProcessPaymentArguments, ProcessPaymentLog>
     {
-        public Task<ExecutionResult> Execute(ExecuteContext<ProcessPaymentArguments> context)
+        public async Task<ExecutionResult> Execute(ExecuteContext<ProcessPaymentArguments> context)
         {
-            throw new System.NotImplementedException();
+            var authorizationCode = "ABC123";
+
+            return context.Completed(new Log(authorizationCode, context.Arguments.Amount));
         }
 
-        public Task<CompensationResult> Compensate(CompensateContext<ProcessPaymentLog> context)
+        public async Task<CompensationResult> Compensate(CompensateContext<ProcessPaymentLog> context)
         {
-            throw new System.NotImplementedException();
+            return context.Compensated();
+        }
+
+
+        class Log :
+            ProcessPaymentLog
+        {
+            public Log(string authorizationCode, decimal amount)
+            {
+                AuthorizationCode = authorizationCode;
+                Amount = amount;
+                ChargeDate = DateTime.Today;
+            }
+
+            public DateTime ChargeDate { get; }
+            public string AuthorizationCode { get; }
+            public decimal Amount { get; }
         }
     }
 }
