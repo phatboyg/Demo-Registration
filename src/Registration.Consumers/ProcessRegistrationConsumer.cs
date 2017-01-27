@@ -59,9 +59,16 @@
                 context.Message.RaceId
             });
 
-            var paymentInfo = _paymentInfoService.GetPaymentInfo(context.Message.ParticipantEmailAddress);
+            var paymentInfo = _paymentInfoService.GetPaymentInfo(context.Message.ParticipantEmailAddress, context.Message.CardNumber);
 
             builder.AddActivity("ProcessPayment", context.GetDestinationAddress("execute-processpayment"), paymentInfo);
+
+            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.ActivityFaulted, RoutingSlipEventContents.None, "ProcessPayment",
+                x => x.Send<RegistrationPaymentFailed>(new
+                {
+                    context.Message.SubmissionId
+                }));
+
 
             builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed, x => x.Send<RegistrationCompleted>(new
             {

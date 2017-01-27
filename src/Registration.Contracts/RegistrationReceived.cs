@@ -11,6 +11,8 @@ namespace Registration.Contracts
         string ParticipantLicenseNumber { get; }
         string ParticipantCategory { get; }
 
+        string CardNumber { get; }
+
         string EventId { get; }
         string RaceId { get; }
     }

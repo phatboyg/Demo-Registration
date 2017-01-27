@@ -28,7 +28,7 @@
         static RegistrationReceived CreateReceivedEvent(SubmitRegistration message)
         {
             return new Received(message.SubmissionId, message.ParticipantEmailAddress, message.ParticipantLicenseNumber,
-                message.ParticipantCategory, message.EventId, message.RaceId);
+                message.ParticipantCategory, message.EventId, message.RaceId, message.CardNumber);
         }
 
         void ValidateRegistration(SubmitRegistration message)
@@ -49,7 +49,7 @@
             RegistrationReceived
         {
             public Received(Guid submissionId, string participantEmailAddress, string participantLicenseNumber, string participantCategory, string eventId,
-                string raceId)
+                string raceId, string cardNumber)
             {
                 SubmissionId = submissionId;
                 ParticipantEmailAddress = participantEmailAddress;
@@ -57,6 +57,7 @@
                 ParticipantCategory = participantCategory;
                 EventId = eventId;
                 RaceId = raceId;
+                CardNumber = cardNumber;
 
                 Timestamp = DateTime.UtcNow;
             }
@@ -68,8 +69,7 @@
             public string ParticipantCategory { get; }
             public string EventId { get; }
             public string RaceId { get; }
+            public string CardNumber { get; }
         }
     }
-
-
 }

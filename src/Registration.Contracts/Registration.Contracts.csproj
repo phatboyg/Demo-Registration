@@ -57,6 +57,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RegistrationCompleted.cs" />
     <Compile Include="RegistrationLicenseVerificationFailed.cs" />
+    <Compile Include="RegistrationPaymentFailed.cs" />
     <Compile Include="RegistrationReceived.cs" />
     <Compile Include="SubmitRegistration.cs" />
   </ItemGroup>

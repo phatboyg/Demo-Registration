@@ -2,6 +2,6 @@
 {
     public interface ISecurePaymentInfoService
     {
-        SecurePaymentInfo GetPaymentInfo(string emailAddress);
+        SecurePaymentInfo GetPaymentInfo(string emailAddress, string cardNumber);
     }
 }

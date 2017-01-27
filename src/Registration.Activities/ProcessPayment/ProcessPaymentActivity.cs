@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Courier;
+    using MassTransit.Courier.Exceptions;
     using MassTransit.Logging;
 
 
@@ -14,6 +15,11 @@
         public async Task<ExecutionResult> Execute(ExecuteContext<ProcessPaymentArguments> context)
         {
             _log.InfoFormat("Processing Payment: {0}", context.Arguments.Amount);
+
+            if (context.Arguments.CardNumber == "4147")
+            {
+                throw new RoutingSlipException("The card number is invalid");
+            }
 
             var authorizationCode = "ABC123";
 

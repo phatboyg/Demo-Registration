@@ -35,6 +35,11 @@
                 x.CorrelateById(m => m.Message.SubmissionId);
             });
 
+            Event(() => PaymentFailed, x =>
+            {
+                x.CorrelateById(m => m.Message.SubmissionId);
+            });
+
             Initially(
                 When(EventRegistrationReceived)
                     .Then(Initialize)
@@ -47,6 +52,9 @@
                     .TransitionTo(Registered),
                 When(LicenseVerificationFailed)
                     .Then(InvalidLicense)
+                    .TransitionTo(Suspended),
+                When(PaymentFailed)
+                    .Then(PaymentFailure)
                     .TransitionTo(Suspended));
 
             During(Suspended,
@@ -63,6 +71,7 @@
         public Event<RegistrationReceived> EventRegistrationReceived { get; private set; }
         public Event<RegistrationCompleted> EventRegistrationCompleted { get; private set; }
         public Event<RegistrationLicenseVerificationFailed> LicenseVerificationFailed { get; private set; }
+        public Event<RegistrationPaymentFailed> PaymentFailed { get; private set; }
 
         void Initialize(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
         {
@@ -76,7 +85,12 @@
 
         void InvalidLicense(BehaviorContext<RegistrationStateInstance, RegistrationLicenseVerificationFailed> context)
         {
-            _log.InfoFormat("Invalid License: {0} ({1})", context.Data.SubmissionId, context.Instance.ParticipantLicenseNumber);
+            _log.InfoFormat("Invalid License: {0} ({1}) - {2}", context.Data.SubmissionId, context.Instance.ParticipantLicenseNumber, context.Data.ExceptionInfo.Message);
+        }
+
+        void PaymentFailure(BehaviorContext<RegistrationStateInstance, RegistrationPaymentFailed> context)
+        {
+            _log.InfoFormat("Payment Failed: {0} ({1}) - {2}", context.Data.SubmissionId, context.Instance.ParticipantEmailAddress, context.Data.ExceptionInfo.Message);
         }
 
         async Task InitiateProcessing(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
@@ -109,7 +123,7 @@
         static ProcessRegistration CreateProcessRegistration(RegistrationReceived message)
         {
             return new Process(message.SubmissionId, message.ParticipantEmailAddress, message.ParticipantLicenseNumber, message.ParticipantCategory,
-                message.EventId, message.RaceId);
+                message.EventId, message.RaceId, message.CardNumber);
         }
 
 
@@ -117,7 +131,7 @@
             ProcessRegistration
         {
             public Process(Guid submissionId, string participantEmailAddress, string participantLicenseNumber, string participantCategory, string eventId,
-                string raceId)
+                string raceId, string cardNumber)
             {
                 SubmissionId = submissionId;
                 ParticipantEmailAddress = participantEmailAddress;
@@ -125,6 +139,7 @@
                 ParticipantCategory = participantCategory;
                 EventId = eventId;
                 RaceId = raceId;
+                CardNumber = cardNumber;
 
                 Timestamp = DateTime.UtcNow;
             }
@@ -136,6 +151,7 @@
             public string ParticipantCategory { get; }
             public string EventId { get; }
             public string RaceId { get; }
+            public string CardNumber { get; }
         }
     }
 }

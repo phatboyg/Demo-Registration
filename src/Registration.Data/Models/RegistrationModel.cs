@@ -15,5 +15,6 @@
         public string EventId { get; set; }
         public string RaceId { get; set; }
         public string Status { get; set; }
+        public string CardNumber { get; set; }
     }
 }

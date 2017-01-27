@@ -3,9 +3,9 @@
     public class SecurePaymentInfoService : 
         ISecurePaymentInfoService
     {
-        public SecurePaymentInfo GetPaymentInfo(string emailAddress)
+        public SecurePaymentInfo GetPaymentInfo(string emailAddress, string cardNumber)
         {
-            return new Info("5317012345678901", "123", "FRANK UNDERHILL", 12, 2019);
+            return new Info(cardNumber, "123", "FRANK UNDERHILL", 12, 2019);
         }
 
 
