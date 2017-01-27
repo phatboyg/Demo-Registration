@@ -1,4 +1,4 @@
-namespace StateService
+namespace Registration.Data
 {
     using MassTransit.EntityFrameworkIntegration;
     using RegistrationState;

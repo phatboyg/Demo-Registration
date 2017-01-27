@@ -44,6 +44,14 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.1.3\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="GreenPipes, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b800c4cfcdeea87b, processorArchitecture=MSIL">
       <HintPath>..\packages\GreenPipes.1.0.9\lib\net452\GreenPipes.dll</HintPath>
       <Private>True</Private>
@@ -188,7 +196,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Models\RegistrationModel.cs" />
+    <Compile Include="Models\RegistrationResponseModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -249,6 +257,14 @@
     <ProjectReference Include="..\Registration.Contracts\Registration.Contracts.csproj">
       <Project>{E18BB1D1-E9B9-416F-863A-6A09668151FD}</Project>
       <Name>Registration.Contracts</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Registration.Data\Registration.Data.csproj">
+      <Project>{6618FB0D-E08F-494F-A06F-3F1B43831B18}</Project>
+      <Name>Registration.Data</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\RegistrationState\RegistrationState.csproj">
+      <Project>{6d0c586a-36ac-436f-99c9-16d3443969dd}</Project>
+      <Name>RegistrationState</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

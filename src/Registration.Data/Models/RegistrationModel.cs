@@ -1,4 +1,4 @@
-﻿namespace Registration.Api.Models
+﻿namespace Registration.Data.Models
 {
     using System;
     using Contracts;
@@ -14,5 +14,6 @@
         public string ParticipantCategory { get; set; }
         public string EventId { get; set; }
         public string RaceId { get; set; }
+        public string Status { get; set; }
     }
 }

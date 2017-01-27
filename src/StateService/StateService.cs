@@ -13,6 +13,7 @@
     using MassTransit.Saga;
     using Registration.Common;
     using Registration.Contracts;
+    using Registration.Data;
     using RegistrationState;
     using Topshelf;
     using Topshelf.Logging;
