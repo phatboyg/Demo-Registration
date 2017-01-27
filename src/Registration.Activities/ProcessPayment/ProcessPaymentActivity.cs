@@ -3,13 +3,18 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Courier;
+    using MassTransit.Logging;
 
 
     public class ProcessPaymentActivity :
         Activity<ProcessPaymentArguments, ProcessPaymentLog>
     {
+        static readonly ILog _log = Logger.Get<ProcessPaymentActivity>();
+
         public async Task<ExecutionResult> Execute(ExecuteContext<ProcessPaymentArguments> context)
         {
+            _log.InfoFormat("Processing Payment: {0}", context.Arguments.Amount);
+
             var authorizationCode = "ABC123";
 
             return context.Completed(new Log(authorizationCode, context.Arguments.Amount));

@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Consumers", "R
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Common", "Registration.Common\Registration.Common.csproj", "{4E8E698E-10E8-47A7-9936-AFDF41BE552D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Api", "Registration.Api\Registration.Api.csproj", "{F4589639-14FF-4371-BD21-156EAAA606AC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,10 @@ Global
 		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4589639-14FF-4371-BD21-156EAAA606AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4589639-14FF-4371-BD21-156EAAA606AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4589639-14FF-4371-BD21-156EAAA606AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4589639-14FF-4371-BD21-156EAAA606AC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -67,5 +73,6 @@ Global
 		{9967508E-CF77-4C33-A7FC-AFDD233793F9} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
 		{EDFCE100-86F4-449D-89CD-DA91E96FAC30} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
 		{74F041D7-BB06-4377-96E0-8585AC19FC5F} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
+		{F4589639-14FF-4371-BD21-156EAAA606AC} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
 	EndGlobalSection
 EndGlobal

@@ -4,18 +4,25 @@
     using System.Threading.Tasks;
     using Contracts;
     using MassTransit;
+    using MassTransit.Logging;
 
 
     public class SubmitRegistrationConsumer :
         IConsumer<SubmitRegistration>
     {
+        readonly ILog _log = Logger.Get<SubmitRegistrationConsumer>();
+
         public async Task Consume(ConsumeContext<SubmitRegistration> context)
         {
+            _log.InfoFormat("Registration received: {0} ({1})", context.Message.SubmissionId, context.Message.ParticipantEmailAddress);
+
             ValidateRegistration(context.Message);
 
             var received = CreateReceivedEvent(context.Message);
 
             await context.Publish(received).ConfigureAwait(false);
+
+            _log.InfoFormat("Registration accepted: {0} ({1})", context.Message.SubmissionId, context.Message.ParticipantEmailAddress);
         }
 
         static RegistrationReceived CreateReceivedEvent(SubmitRegistration message)

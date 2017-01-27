@@ -3,6 +3,8 @@ build_output/*
 
 .fake/**/*
 
+.vs
+
 **/*.suo
 **/**/*.suo
 **/*.user

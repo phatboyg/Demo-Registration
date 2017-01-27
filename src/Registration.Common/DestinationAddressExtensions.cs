@@ -17,5 +17,17 @@
 
             return builder.Uri;
         }
+
+        public static Uri GetDestinationAddress(this Uri hostAddress, string queueName)
+        {
+            var builder = new UriBuilder
+            {
+                Scheme = hostAddress.Scheme,
+                Host = hostAddress.Host,
+                Path = queueName
+            };
+
+            return builder.Uri;
+        }
     }
 }

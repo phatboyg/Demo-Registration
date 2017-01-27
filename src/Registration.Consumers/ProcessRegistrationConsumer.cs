@@ -6,12 +6,15 @@
     using MassTransit;
     using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
+    using MassTransit.Logging;
 
 
     public class ProcessRegistrationConsumer :
         IConsumer<ProcessRegistration>
     {
-        ISecurePaymentInfoService _paymentInfoService;
+        static readonly ILog _log = Logger.Get<ProcessRegistrationConsumer>();
+
+        readonly ISecurePaymentInfoService _paymentInfoService;
 
         public ProcessRegistrationConsumer()
         {
@@ -20,6 +23,8 @@
 
         public async Task Consume(ConsumeContext<ProcessRegistration> context)
         {
+            _log.InfoFormat("Processing registration: {0} ({1})", context.Message.SubmissionId, context.Message.ParticipantEmailAddress);
+
             var routingSlip = CreateRoutingSlip(context);
 
             await context.Execute(routingSlip).ConfigureAwait(false);
@@ -33,7 +38,7 @@
             {
                 builder.AddActivity("LicenseVerificiation", context.GetDestinationAddress("execute-licenseverification"), new
                 {
-                    LicenceNumber = context.Message.ParticipantLicenseNumber,
+                    LicenseNumber = context.Message.ParticipantLicenseNumber,
                     EventType = "Road",
                     Category = context.Message.ParticipantCategory
                 });
@@ -52,8 +57,7 @@
 
             builder.AddActivity("ProcessPayment", context.GetDestinationAddress("execute-processpayment"), paymentInfo);
 
-
-            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed, RoutingSlipEventContents.All, async x =>
+            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed, RoutingSlipEventContents.Variables, async x =>
             {
                 await x.Send<RegistrationCompleted>(new
                 {

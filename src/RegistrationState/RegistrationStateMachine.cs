@@ -5,6 +5,7 @@
     using Automatonymous;
     using GreenPipes;
     using MassTransit;
+    using MassTransit.Logging;
     using MassTransit.Util;
     using Registration.Contracts;
 
@@ -12,6 +13,8 @@
     public class RegistrationStateMachine :
         MassTransitStateMachine<RegistrationStateInstance>
     {
+        static readonly ILog _log = Logger.Get<RegistrationStateMachine>();
+
         public RegistrationStateMachine()
         {
             InstanceState(x => x.CurrentState);
@@ -45,12 +48,12 @@
 
             During(Received,
                 When(EventRegistrationCompleted)
-                .Then(Complete)
-                .TransitionTo(Completed));
+                    .Then(Register)
+                    .TransitionTo(Registered));
         }
 
         public State Received { get; private set; }
-        public State Completed { get; private set; }
+        public State Registered { get; private set; }
 
         public Event<RegistrationReceived> EventRegistrationReceived { get; private set; }
         public Event<RegistrationCompleted> EventRegistrationCompleted { get; private set; }
@@ -60,8 +63,9 @@
             InitializeInstance(context.Instance, context.Data);
         }
 
-        void Complete(BehaviorContext<RegistrationStateInstance, RegistrationCompleted> context)
+        void Register(BehaviorContext<RegistrationStateInstance, RegistrationCompleted> context)
         {
+            _log.InfoFormat("Registered: {0} ({1})", context.Data.SubmissionId, context.Instance.ParticipantEmailAddress);
         }
 
         async Task InitiateProcessing(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
@@ -75,10 +79,14 @@
             }
 
             await context.GetPayload<ConsumeContext>().Send(destinationAddress, registration).ConfigureAwait(false);
+
+            _log.InfoFormat("Processing: {0} ({1})", context.Data.SubmissionId, context.Data.ParticipantEmailAddress);
         }
 
         static void InitializeInstance(RegistrationStateInstance instance, RegistrationReceived data)
         {
+            _log.InfoFormat("Initializing: {0} ({1})", data.SubmissionId, data.ParticipantEmailAddress);
+
             instance.ParticipantEmailAddress = data.ParticipantEmailAddress;
             instance.ParticipantLicenseNumber = data.ParticipantLicenseNumber;
             instance.ParticipantCategory = data.ParticipantCategory;

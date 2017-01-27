@@ -102,6 +102,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Registration.Common\Registration.Common.csproj">
+      <Project>{4E8E698E-10E8-47A7-9936-AFDF41BE552D}</Project>
+      <Name>Registration.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Registration.Contracts\Registration.Contracts.csproj">
       <Project>{e18bb1d1-e9b9-416f-863a-6a09668151fd}</Project>
       <Name>Registration.Contracts</Name>

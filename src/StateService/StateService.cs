@@ -8,6 +8,7 @@
     using MassTransit;
     using MassTransit.AzureServiceBusTransport;
     using MassTransit.Saga;
+    using Registration.Common;
     using Registration.Contracts;
     using RegistrationState;
     using Topshelf;
@@ -31,7 +32,8 @@
                 {
                 });
 
-                EndpointConvention.Map<ProcessRegistration>(GetDestinationAddress(host, ConfigurationManager.AppSettings["ProcessRegistrationQueueName"]));
+                EndpointConvention.Map<ProcessRegistration>(
+                    host.Settings.ServiceUri.GetDestinationAddress(ConfigurationManager.AppSettings["ProcessRegistrationQueueName"]));
 
                 cfg.ReceiveEndpoint(host, ConfigurationManager.AppSettings["RegistrationStateQueueName"], e =>
                 {
