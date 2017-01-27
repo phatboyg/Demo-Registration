@@ -42,6 +42,12 @@
                     EventType = "Road",
                     Category = context.Message.ParticipantCategory
                 });
+
+                builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.ActivityFaulted, RoutingSlipEventContents.None, "LicenseVerificiation",
+                    x => x.Send<RegistrationLicenseVerificationFailed>(new
+                    {
+                        context.Message.SubmissionId
+                    }));
             }
 
             builder.AddActivity("EventRegistration", context.GetDestinationAddress("execute-eventregistration"), new
@@ -57,10 +63,11 @@
 
             builder.AddActivity("ProcessPayment", context.GetDestinationAddress("execute-processpayment"), paymentInfo);
 
-            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed,  x => x.Send<RegistrationCompleted>(new
+            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed, x => x.Send<RegistrationCompleted>(new
             {
                 context.Message.SubmissionId
             }));
+
 
             return builder.Build();
         }

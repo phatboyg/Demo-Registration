@@ -3,6 +3,7 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit.Courier;
+    using MassTransit.Courier.Exceptions;
     using MassTransit.Logging;
 
 
@@ -16,6 +17,11 @@
             _log.InfoFormat("Verifying license: {0}", context.Arguments.LicenseNumber);
 
             // verify license with remote service
+
+            if (context.Arguments.LicenseNumber == "8675309")
+            {
+                throw new RoutingSlipException($"The license number is invalid: {context.Arguments.LicenseNumber}");
+            }
 
             var expirationDate = DateTime.Today + TimeSpan.FromDays(90);
 

@@ -23,15 +23,14 @@
             {
                 x.CorrelateById(m => m.Message.SubmissionId);
                 x.SelectId(m => m.Message.SubmissionId);
-
-                x.InsertOnInitial = true;
-                x.SetSagaFactory(context => new RegistrationStateInstance
-                {
-                    CorrelationId = context.Message.SubmissionId
-                });
             });
 
             Event(() => EventRegistrationCompleted, x =>
+            {
+                x.CorrelateById(m => m.Message.SubmissionId);
+            });
+
+            Event(() => LicenseVerificationFailed, x =>
             {
                 x.CorrelateById(m => m.Message.SubmissionId);
             });
@@ -45,14 +44,25 @@
             During(Received,
                 When(EventRegistrationCompleted)
                     .Then(Register)
-                    .TransitionTo(Registered));
+                    .TransitionTo(Registered),
+                When(LicenseVerificationFailed)
+                    .Then(InvalidLicense)
+                    .TransitionTo(Suspended));
+
+            During(Suspended,
+                When(EventRegistrationReceived)
+                    .Then(Initialize)
+                    .ThenAsync(InitiateProcessing)
+                    .TransitionTo(Received));
         }
 
         public State Received { get; private set; }
         public State Registered { get; private set; }
+        public State Suspended { get; private set; }
 
         public Event<RegistrationReceived> EventRegistrationReceived { get; private set; }
         public Event<RegistrationCompleted> EventRegistrationCompleted { get; private set; }
+        public Event<RegistrationLicenseVerificationFailed> LicenseVerificationFailed { get; private set; }
 
         void Initialize(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
         {
@@ -62,6 +72,11 @@
         void Register(BehaviorContext<RegistrationStateInstance, RegistrationCompleted> context)
         {
             _log.InfoFormat("Registered: {0} ({1})", context.Data.SubmissionId, context.Instance.ParticipantEmailAddress);
+        }
+
+        void InvalidLicense(BehaviorContext<RegistrationStateInstance, RegistrationLicenseVerificationFailed> context)
+        {
+            _log.InfoFormat("Invalid License: {0} ({1})", context.Data.SubmissionId, context.Instance.ParticipantLicenseNumber);
         }
 
         async Task InitiateProcessing(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
