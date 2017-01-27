@@ -1,12 +1,15 @@
 ﻿namespace StateService
 {
     using System;
+    using System.Collections.Generic;
     using System.Configuration;
     using System.Linq;
     using Automatonymous;
     using GreenPipes;
     using MassTransit;
     using MassTransit.AzureServiceBusTransport;
+    using MassTransit.EntityFrameworkIntegration;
+    using MassTransit.EntityFrameworkIntegration.Saga;
     using MassTransit.Saga;
     using Registration.Common;
     using Registration.Contracts;
@@ -21,10 +24,17 @@
         readonly LogWriter _log = HostLogger.Get<StateService>();
 
         IBusControl _busControl;
+        ISagaRepository<RegistrationStateInstance> _sagaRepository;
 
         public bool Start(HostControl hostControl)
         {
             _log.Info("Creating bus...");
+
+            var connectionString = ConfigurationManager.AppSettings["DatabaseConnectionString"];
+
+            SagaDbContextFactory sagaDbContextFactory = () => new SagaDbContext<RegistrationStateInstance, RegistrationStateInstanceMap>(connectionString);
+
+            _sagaRepository = new EntityFrameworkSagaRepository<RegistrationStateInstance>(sagaDbContextFactory);
 
             _busControl = Bus.Factory.CreateUsingAzureServiceBus(cfg =>
             {
@@ -42,11 +52,11 @@
                     var paritioner = cfg.CreatePartitioner(8);
 
                     var machine = new RegistrationStateMachine();
-                    var repository = new InMemorySagaRepository<RegistrationStateInstance>();
 
-                    e.StateMachineSaga(machine, repository, x =>
+                    e.StateMachineSaga(machine, _sagaRepository, x =>
                     {
                         x.Message<RegistrationReceived>(m => m.UsePartitioner(paritioner, p => p.Message.SubmissionId));
+                        x.Message<RegistrationCompleted>(m => m.UsePartitioner(paritioner, p => p.Message.SubmissionId));
                     });
                 });
             });
@@ -69,7 +79,7 @@
 
         public Uri GetDestinationAddress(IServiceBusHost host, string queueName)
         {
-            var segments = new[] {host.Settings.ServiceUri.AbsolutePath.Trim('/'), queueName.Trim('/')}
+            IEnumerable<string> segments = new[] {host.Settings.ServiceUri.AbsolutePath.Trim('/'), queueName.Trim('/')}
                 .Where(x => x.Length > 0);
 
             var builder = new UriBuilder

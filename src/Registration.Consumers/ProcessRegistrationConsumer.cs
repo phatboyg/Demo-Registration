@@ -57,13 +57,10 @@
 
             builder.AddActivity("ProcessPayment", context.GetDestinationAddress("execute-processpayment"), paymentInfo);
 
-            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed, RoutingSlipEventContents.Variables, async x =>
+            builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.Completed,  x => x.Send<RegistrationCompleted>(new
             {
-                await x.Send<RegistrationCompleted>(new
-                {
-                    context.Message.SubmissionId
-                }).ConfigureAwait(false);
-            });
+                context.Message.SubmissionId
+            }));
 
             return builder.Build();
         }

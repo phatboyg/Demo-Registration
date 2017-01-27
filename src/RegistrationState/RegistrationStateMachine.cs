@@ -25,13 +25,9 @@
                 x.SelectId(m => m.Message.SubmissionId);
 
                 x.InsertOnInitial = true;
-                x.SetSagaFactory(context =>
+                x.SetSagaFactory(context => new RegistrationStateInstance
                 {
-                    var instance = new RegistrationStateInstance();
-
-                    InitializeInstance(instance, context.Message);
-
-                    return instance;
+                    CorrelationId = context.Message.SubmissionId
                 });
             });
 
