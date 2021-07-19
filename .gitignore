@@ -1,37 +1,64 @@
-build_artifacts/*
 build_output/*
+build_artifacts/*
+build_temp/*
+*.suo
+*.user
+packages
+*.dotCover
 
-.fake/**/*
-
+*.ncrunch*
 .vs
 
-**/*.suo
-**/**/*.suo
-**/*.user
-**/**/*.user
+.fake
+
+src/logs/*
 
 bin
 obj
 _ReSharper*
-*.dotCover
 
 *.csproj.user
 *.resharper.user
-*.ReSharper.user
+*.resharper
+*.ReSharper
 *.cache
 *~
 *.swp
 *.bak
 *.orig
-*.user
 
 NuGet.exe
 packages
 
+# Tests
 TestResult.xml
 submit.xml
-src/tests/*
-tests/*
-doc/*
 SolutionVersion.cs
-AppPackages/
+src/SolutionVersion.cs
+doc/build/*
+*.[lm]df
+*.runsettings
+
+# osx noise
+.DS_Store
+*.DotSettings
+/src/MassTransit.SimpleInjectorIntegration/MassTransit.SimpleInjectorIntegration.csproj.nuspec
+*.DS_Store
+
+docs/.vuepress/dist
+_book
+/node_modules
+.vscode
+**/.idea/
+appsettings.Development.json
+package-lock.json
+
+
+# Cake
+tools/**
+!tools/packages.config
+
+# Artifacts
+artifacts/**
+artifacts_old/**
+/src/.ionide

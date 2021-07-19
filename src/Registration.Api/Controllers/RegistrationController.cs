@@ -1,76 +1,59 @@
-﻿namespace Registration.Api.Controllers
+namespace Registration.Api.Controllers
 {
     using System;
     using System.Collections.Generic;
-    using System.Configuration;
-    using System.Net;
-    using System.Net.Http;
     using System.Threading.Tasks;
-    using System.Web.Http;
-    using System.Web.Http.Routing;
     using Contracts;
     using Data;
     using Data.Models;
     using MassTransit;
-    using Models;
+    using Microsoft.AspNetCore.Mvc;
 
 
+    [ApiController]
+    [Route("[controller]")]
     public class RegistrationController :
-        ApiController
+        ControllerBase
     {
-        // GET api/<controller>
-        public IEnumerable<string> Get()
+        readonly IPublishEndpoint _publishEndpoint;
+        readonly IRegistrationStateReader _reader;
+
+        public RegistrationController(IRegistrationStateReader reader, IPublishEndpoint publishEndpoint)
         {
-            return new[] {"value1", "value2"};
+            _reader = reader;
+            _publishEndpoint = publishEndpoint;
         }
 
-        // GET api/<controller>/5
-        [Route("~/api/registration/{submissionId:Guid}", Name = "RegistrationStatus")]
-        public async Task<RegistrationModel> Get(Guid submissionId)
+        [HttpGet(Name = "RegistrationStatus")]
+        public async Task<IActionResult> Get(Guid submissionId)
         {
-            var reader = new RegistrationStateReader(ConfigurationManager.AppSettings["DatabaseConnectionString"]);
             try
             {
-                var registration = await reader.Get(submissionId);
+                var registration = await _reader.Get(submissionId);
 
-                return registration;
+                return Ok(registration);
             }
-            catch (Exception exception)
+            catch (Exception)
             {
-                throw new HttpResponseException(HttpStatusCode.NotFound);
+                return NotFound();
             }
         }
 
-        // POST api/<controller>
-        public async Task<HttpResponseMessage> Post([FromBody] RegistrationModel registration)
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] RegistrationModel registration)
         {
-            await WebApiApplication.Bus.Send<SubmitRegistration>(registration);
+            await _publishEndpoint.Publish<SubmitRegistration>(registration);
 
-
-            var urlHelper = new UrlHelper(Request);
-
-            var response = new RegistrationResponseModel
+            var response = new
             {
-                SubmissionId = registration.SubmissionId,
-                Actions = new Dictionary<string, Uri>
+                registration.SubmissionId,
+                Actions = new Dictionary<string, string>
                 {
-                    {"Status", new Uri(urlHelper.Link("RegistrationStatus", new {submissionId = registration.SubmissionId}))}
+                    {"Status", Url.Link("RegistrationStatus", new {submissionId = registration.SubmissionId})}
                 }
             };
 
-            return Request.CreateResponse(HttpStatusCode.Accepted, response);
+            return Ok(response);
         }
-
-//        // PUT api/<controller>/5
-//        }
-
-//
-//        public void Put(int id, [FromBody]string value)
-
-//        {
-//        // DELETE api/<controller>/5
-//        public void Delete(int id)
-//        {
-//        }
     }
 }

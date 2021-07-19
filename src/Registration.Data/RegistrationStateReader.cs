@@ -1,29 +1,27 @@
 ﻿namespace Registration.Data
 {
     using System;
-    using System.Data.Entity;
     using System.Linq;
     using System.Threading.Tasks;
-    using MassTransit.EntityFrameworkIntegration;
+    using Components.StateMachines;
+    using Microsoft.EntityFrameworkCore;
     using Models;
-    using RegistrationState;
 
 
     public class RegistrationStateReader :
         IRegistrationStateReader
     {
-        readonly SagaDbContextFactory _sagaDbContextFactory;
+        readonly RegistrationDbContext _context;
 
-        public RegistrationStateReader(string connectionString)
+        public RegistrationStateReader(RegistrationDbContext context)
         {
-            _sagaDbContextFactory = () => new SagaDbContext<RegistrationStateInstance, RegistrationStateInstanceMap>(connectionString);
+            _context = context;
         }
 
         public async Task<RegistrationModel> Get(Guid submissionId)
         {
-            using (var dbContext = _sagaDbContextFactory())
             {
-                var instance = await dbContext.Set<RegistrationStateInstance>()
+                var instance = await _context.Set<RegistrationStateInstance>()
                     .Where(x => x.CorrelationId == submissionId)
                     .SingleAsync().ConfigureAwait(false);
 

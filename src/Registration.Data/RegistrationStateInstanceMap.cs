@@ -1,23 +1,25 @@
 namespace Registration.Data
 {
-    using MassTransit.EntityFrameworkIntegration;
-    using RegistrationState;
+    using Components.StateMachines;
+    using MassTransit.EntityFrameworkCoreIntegration.Mappings;
+    using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 
     public class RegistrationStateInstanceMap :
-        SagaClassMapping<RegistrationStateInstance>
+        SagaClassMap<RegistrationStateInstance>
     {
-        public RegistrationStateInstanceMap()
+        protected override void Configure(EntityTypeBuilder<RegistrationStateInstance> entity, ModelBuilder model)
         {
-            Property(x => x.ParticipantEmailAddress)
+            entity.Property(x => x.ParticipantEmailAddress)
                 .HasMaxLength(256);
-            Property(x => x.ParticipantCategory)
+            entity.Property(x => x.ParticipantCategory)
                 .HasMaxLength(20);
-            Property(x => x.ParticipantLicenseNumber)
+            entity.Property(x => x.ParticipantLicenseNumber)
                 .HasMaxLength(20);
-            Property(x => x.EventId)
+            entity.Property(x => x.EventId)
                 .HasMaxLength(60);
-            Property(x => x.RaceId)
+            entity.Property(x => x.RaceId)
                 .HasMaxLength(60);
         }
     }

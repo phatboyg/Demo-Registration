@@ -5,25 +5,13 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Contracts", "Registration.Contracts\Registration.Contracts.csproj", "{E18BB1D1-E9B9-416F-863A-6A09668151FD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrationService", "RegistrationService\RegistrationService.csproj", "{9967508E-CF77-4C33-A7FC-AFDD233793F9}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{EFB2E94B-379B-4A5E-B943-7B9691C36F4A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StateService", "StateService\StateService.csproj", "{EDFCE100-86F4-449D-89CD-DA91E96FAC30}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrationState", "RegistrationState\RegistrationState.csproj", "{6D0C586A-36AC-436F-99C9-16D3443969DD}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Activities", "Registration.Activities\Registration.Activities.csproj", "{2171562E-8DF2-482A-99B4-DD3AEB2952A0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RegistrationActivityService", "RegistrationActivityService\RegistrationActivityService.csproj", "{74F041D7-BB06-4377-96E0-8585AC19FC5F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Consumers", "Registration.Consumers\Registration.Consumers.csproj", "{4F85D0C4-D778-412E-BF8E-23BA6D24B108}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Common", "Registration.Common\Registration.Common.csproj", "{4E8E698E-10E8-47A7-9936-AFDF41BE552D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Components", "Registration.Components\Registration.Components.csproj", "{4F85D0C4-D778-412E-BF8E-23BA6D24B108}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Api", "Registration.Api\Registration.Api.csproj", "{F4589639-14FF-4371-BD21-156EAAA606AC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Data", "Registration.Data\Registration.Data.csproj", "{6618FB0D-E08F-494F-A06F-3F1B43831B18}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Registration.Service", "Registration.Service\Registration.Service.csproj", "{67BFE1AD-6910-46A9-8F27-81627F6801FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -35,34 +23,10 @@ Global
 		{E18BB1D1-E9B9-416F-863A-6A09668151FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E18BB1D1-E9B9-416F-863A-6A09668151FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E18BB1D1-E9B9-416F-863A-6A09668151FD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9967508E-CF77-4C33-A7FC-AFDD233793F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9967508E-CF77-4C33-A7FC-AFDD233793F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9967508E-CF77-4C33-A7FC-AFDD233793F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9967508E-CF77-4C33-A7FC-AFDD233793F9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{EDFCE100-86F4-449D-89CD-DA91E96FAC30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{EDFCE100-86F4-449D-89CD-DA91E96FAC30}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{EDFCE100-86F4-449D-89CD-DA91E96FAC30}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{EDFCE100-86F4-449D-89CD-DA91E96FAC30}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6D0C586A-36AC-436F-99C9-16D3443969DD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6D0C586A-36AC-436F-99C9-16D3443969DD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6D0C586A-36AC-436F-99C9-16D3443969DD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6D0C586A-36AC-436F-99C9-16D3443969DD}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2171562E-8DF2-482A-99B4-DD3AEB2952A0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2171562E-8DF2-482A-99B4-DD3AEB2952A0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2171562E-8DF2-482A-99B4-DD3AEB2952A0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2171562E-8DF2-482A-99B4-DD3AEB2952A0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{74F041D7-BB06-4377-96E0-8585AC19FC5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{74F041D7-BB06-4377-96E0-8585AC19FC5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{74F041D7-BB06-4377-96E0-8585AC19FC5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{74F041D7-BB06-4377-96E0-8585AC19FC5F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4F85D0C4-D778-412E-BF8E-23BA6D24B108}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4F85D0C4-D778-412E-BF8E-23BA6D24B108}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4F85D0C4-D778-412E-BF8E-23BA6D24B108}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4F85D0C4-D778-412E-BF8E-23BA6D24B108}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E8E698E-10E8-47A7-9936-AFDF41BE552D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{F4589639-14FF-4371-BD21-156EAAA606AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{F4589639-14FF-4371-BD21-156EAAA606AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F4589639-14FF-4371-BD21-156EAAA606AC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -71,14 +35,14 @@ Global
 		{6618FB0D-E08F-494F-A06F-3F1B43831B18}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6618FB0D-E08F-494F-A06F-3F1B43831B18}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6618FB0D-E08F-494F-A06F-3F1B43831B18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{67BFE1AD-6910-46A9-8F27-81627F6801FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{67BFE1AD-6910-46A9-8F27-81627F6801FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{67BFE1AD-6910-46A9-8F27-81627F6801FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{67BFE1AD-6910-46A9-8F27-81627F6801FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{9967508E-CF77-4C33-A7FC-AFDD233793F9} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
-		{EDFCE100-86F4-449D-89CD-DA91E96FAC30} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
-		{74F041D7-BB06-4377-96E0-8585AC19FC5F} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
-		{F4589639-14FF-4371-BD21-156EAAA606AC} = {EFB2E94B-379B-4A5E-B943-7B9691C36F4A}
 	EndGlobalSection
 EndGlobal
