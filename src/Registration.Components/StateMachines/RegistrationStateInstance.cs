@@ -1,7 +1,7 @@
 ﻿namespace Registration.Components.StateMachines
 {
     using System;
-    using Automatonymous;
+    using MassTransit;
 
 
     public class RegistrationStateInstance :

@@ -2,9 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using Automatonymous;
     using Contracts;
-    using GreenPipes;
     using MassTransit;
     using Microsoft.Extensions.Logging;
 

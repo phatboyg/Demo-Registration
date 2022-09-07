@@ -3,7 +3,6 @@
     using System;
     using System.Threading.Tasks;
     using MassTransit;
-    using MassTransit.Courier;
     using Microsoft.Extensions.Logging;
 
 

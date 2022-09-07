@@ -7,7 +7,6 @@
     using Activities.ProcessPayment;
     using Contracts;
     using MassTransit;
-    using MassTransit.Courier;
     using MassTransit.Courier.Contracts;
     using Microsoft.Extensions.Logging;
     using Services;

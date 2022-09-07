@@ -6,6 +6,8 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Registration.Data;
 
+#nullable disable
+
 namespace Registration.Service.Migrations
 {
     [DbContext(typeof(RegistrationDbContext))]
@@ -15,9 +17,10 @@ namespace Registration.Service.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "3.1.11")
-                .HasAnnotation("Relational:MaxIdentifierLength", 128)
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("ProductVersion", "6.0.8")
+                .HasAnnotation("Relational:MaxIdentifierLength", 128);
+
+            SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder, 1L, 1);
 
             modelBuilder.Entity("Registration.Components.StateMachines.RegistrationStateInstance", b =>
                 {
@@ -28,28 +31,28 @@ namespace Registration.Service.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("EventId")
-                        .HasColumnType("nvarchar(60)")
-                        .HasMaxLength(60);
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
 
                     b.Property<string>("ParticipantCategory")
-                        .HasColumnType("nvarchar(20)")
-                        .HasMaxLength(20);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("ParticipantEmailAddress")
-                        .HasColumnType("nvarchar(256)")
-                        .HasMaxLength(256);
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<string>("ParticipantLicenseNumber")
-                        .HasColumnType("nvarchar(20)")
-                        .HasMaxLength(20);
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("RaceId")
-                        .HasColumnType("nvarchar(60)")
-                        .HasMaxLength(60);
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
 
                     b.HasKey("CorrelationId");
 
-                    b.ToTable("RegistrationStateInstance");
+                    b.ToTable("RegistrationStateInstance", (string)null);
                 });
 #pragma warning restore 612, 618
         }

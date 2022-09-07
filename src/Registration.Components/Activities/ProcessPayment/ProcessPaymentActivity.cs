@@ -2,8 +2,7 @@
 {
     using System;
     using System.Threading.Tasks;
-    using MassTransit.Courier;
-    using MassTransit.Courier.Exceptions;
+    using MassTransit;
     using Microsoft.Extensions.Logging;
 
 

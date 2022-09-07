@@ -1,7 +1,6 @@
 namespace Registration.Api
 {
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using Data;
     using MassTransit;
