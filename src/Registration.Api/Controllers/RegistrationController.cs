@@ -1,59 +1,63 @@
-namespace Registration.Api.Controllers
+namespace Registration.Api.Controllers;
+
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Contracts;
+using MassTransit;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+
+
+[ApiController]
+[Route("[controller]")]
+public class RegistrationController :
+    ControllerBase
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using Contracts;
-    using Data;
-    using Data.Models;
-    using MassTransit;
-    using Microsoft.AspNetCore.Mvc;
-
-
-    [ApiController]
-    [Route("[controller]")]
-    public class RegistrationController :
-        ControllerBase
+    /// <summary>
+    /// Return the registration detail, including status
+    /// </summary>
+    /// <param name="submissionId">The registration submission id</param>
+    /// <param name="client"></param>
+    /// <returns></returns>
+    [HttpGet("{submissionId}", Name = "RegistrationStatus")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Get(Guid submissionId, [FromServices] IRequestClient<GetRegistrationStatus> client)
     {
-        readonly IPublishEndpoint _publishEndpoint;
-        readonly IRegistrationStateReader _reader;
-
-        public RegistrationController(IRegistrationStateReader reader, IPublishEndpoint publishEndpoint)
+        try
         {
-            _reader = reader;
-            _publishEndpoint = publishEndpoint;
-        }
+            Response<RegistrationStatus> response = await client.GetResponse<RegistrationStatus>(new GetRegistrationStatus { SubmissionId = submissionId });
 
-        [HttpGet(Name = "RegistrationStatus")]
-        public async Task<IActionResult> Get(Guid submissionId)
+            var registration = response.Message;
+
+            return Ok(registration);
+        }
+        catch (RequestFaultException ex)
         {
-            try
-            {
-                var registration = await _reader.Get(submissionId);
-
-                return Ok(registration);
-            }
-            catch (Exception)
-            {
-                return NotFound();
-            }
+            return NotFound(ex.Message);
         }
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> Post([FromBody] RegistrationModel registration)
+    /// <summary>
+    /// Submits an order
+    /// <response code="202">The registration has been accepted but not yet completed</response>
+    /// </summary>
+    /// <param name="registration">The registration detail</param>
+    /// <param name="publishEndpoint"></param>
+    /// <returns></returns>
+    [HttpPost]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
+    public async Task<IActionResult> Post([FromBody] RegistrationDetail registration, [FromServices] IPublishEndpoint publishEndpoint)
+    {
+        await publishEndpoint.Publish<SubmitRegistration>(registration);
+
+        var response = new
         {
-            await _publishEndpoint.Publish<SubmitRegistration>(registration);
+            registration.SubmissionId,
+            Actions = new Dictionary<string, string> { { "Status", Url.Link("RegistrationStatus", new { submissionId = registration.SubmissionId }) } }
+        };
 
-            var response = new
-            {
-                registration.SubmissionId,
-                Actions = new Dictionary<string, string>
-                {
-                    {"Status", Url.Link("RegistrationStatus", new {submissionId = registration.SubmissionId})}
-                }
-            };
-
-            return Ok(response);
-        }
+        return Ok(response);
     }
 }

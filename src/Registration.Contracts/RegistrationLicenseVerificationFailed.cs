@@ -1,14 +1,12 @@
-namespace Registration.Contracts
+namespace Registration.Contracts;
+
+using System;
+using MassTransit;
+
+
+public record RegistrationLicenseVerificationFailed
 {
-    using System;
-    using MassTransit;
+    public Guid SubmissionId { get; init; }
 
-
-    public interface RegistrationLicenseVerificationFailed
-    {
-        Guid SubmissionId { get; }
-        DateTime Timestamp { get; }
-
-        ExceptionInfo ExceptionInfo { get; }
-    }
+    public ExceptionInfo ExceptionInfo { get; init; }
 }

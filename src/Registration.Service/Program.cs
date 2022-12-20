@@ -1,67 +1,59 @@
-namespace Registration.Service
-{
-    using System.Reflection;
-    using System.Threading.Tasks;
-    using Components.Activities.EventRegistration;
-    using Components.Activities.LicenseVerification;
-    using Components.Activities.ProcessPayment;
-    using Components.Consumers;
-    using Components.StateMachines;
-    using Data;
-    using MassTransit;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.Hosting;
+using System.Reflection;
+using MassTransit;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Registration.Components;
+using Registration.Data;
+using Serilog;
+using Serilog.Events;
 
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("MassTransit", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.Hosting", LogEventLevel.Information)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .WriteTo.Console()
+    .CreateLogger();
 
-    public class Program
+var host = Host.CreateDefaultBuilder(args)
+    .UseSerilog()
+    .ConfigureServices((hostContext, services) =>
     {
-        public static async Task Main(string[] args)
+        services.AddDbContext<RegistrationDbContext>(r =>
         {
-            await CreateHostBuilder(args).Build().RunAsync();
-        }
+            var connectionString = hostContext.Configuration.GetConnectionString("Sagas");
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureServices((hostContext, services) =>
-                {
-                    services.AddDbContext<RegistrationDbContext>(r =>
-                    {
-                        var connectionString = hostContext.Configuration.GetConnectionString("Sagas");
+            r.UseSqlServer(connectionString, m =>
+            {
+                m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
+                m.MigrationsHistoryTable($"__{nameof(RegistrationDbContext)}");
+            });
+        });
 
-                        r.UseSqlServer(connectionString, m =>
-                        {
-                            m.MigrationsAssembly(Assembly.GetExecutingAssembly().GetName().Name);
-                            m.MigrationsHistoryTable($"__{nameof(RegistrationDbContext)}");
-                        });
-                    });
+        services.AddMassTransit(x =>
+        {
+            x.SetKebabCaseEndpointNameFormatter();
 
-                    services.AddMassTransit(x =>
-                    {
-                        x.SetKebabCaseEndpointNameFormatter();
+            x.SetEntityFrameworkSagaRepositoryProvider(r =>
+            {
+                r.ExistingDbContext<RegistrationDbContext>();
+                r.UseSqlServer();
+            });
 
-                        x.AddConsumer<SubmitRegistrationConsumer>();
-                        x.AddConsumer<ProcessRegistrationConsumer>();
+            x.AddConsumersFromNamespaceContaining<ComponentsNamespace>();
+            x.AddActivitiesFromNamespaceContaining<ComponentsNamespace>();
+            x.AddSagaStateMachinesFromNamespaceContaining<ComponentsNamespace>();
 
-                        x.AddExecuteActivity<LicenseVerificationActivity, LicenseVerificationArguments>();
-                        x.AddActivity<EventRegistrationActivity, EventRegistrationArguments, EventRegistrationLog>();
-                        x.AddActivity<ProcessPaymentActivity, ProcessPaymentArguments, ProcessPaymentLog>();
+            x.UsingRabbitMq((context, cfg) =>
+            {
+                cfg.ConfigureEndpoints(context);
+            });
+        });
+    }).Build();
 
-                        x.AddSagaStateMachine<RegistrationStateMachine, RegistrationStateInstance>()
-                            .EntityFrameworkRepository(r =>
-                            {
-                                r.ExistingDbContext<RegistrationDbContext>();
-                                r.UseSqlServer();
-                            });
-
-                        x.UsingRabbitMq((context, cfg) =>
-                        {
-                            cfg.ConfigureEndpoints(context);
-                        });
-                    });
-
-                    services.AddMassTransitHostedService(true);
-                });
-    }
-}
+await host.RunAsync();

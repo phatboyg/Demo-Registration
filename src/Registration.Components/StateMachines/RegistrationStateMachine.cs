@@ -1,153 +1,116 @@
-﻿namespace Registration.Components.StateMachines
+﻿namespace Registration.Components.StateMachines;
+
+using Contracts;
+using MassTransit;
+
+
+public class RegistrationStateMachine :
+    MassTransitStateMachine<RegistrationState>
 {
-    using System;
-    using System.Threading.Tasks;
-    using Automatonymous;
-    using Contracts;
-    using GreenPipes;
-    using MassTransit;
-    using Microsoft.Extensions.Logging;
-
-
-    public class RegistrationStateMachine :
-        MassTransitStateMachine<RegistrationStateInstance>
+    public RegistrationStateMachine()
     {
-        readonly ILogger<RegistrationStateMachine> _logger;
+        InstanceState(x => x.CurrentState);
 
-        public RegistrationStateMachine(ILogger<RegistrationStateMachine> logger)
+        Event(() => RegistrationStatusRequested, x =>
         {
-            _logger = logger;
-            InstanceState(x => x.CurrentState);
+            x.ReadOnly = true;
+            x.OnMissingInstance(m => m.Fault());
+        });
 
-            Event(() => EventRegistrationReceived, x =>
-            {
-                x.CorrelateById(m => m.Message.SubmissionId);
-                x.SelectId(m => m.Message.SubmissionId);
-            });
+        Initially(
+            When(EventRegistrationReceived)
+                .Initialize()
+                .InitiateProcessing()
+                .TransitionTo(Received));
 
-            Event(() => EventRegistrationCompleted, x =>
-            {
-                x.CorrelateById(m => m.Message.SubmissionId);
-            });
+        During(Received,
+            When(EventRegistrationCompleted)
+                .Registered()
+                .TransitionTo(Registered),
+            When(LicenseVerificationFailed)
+                .InvalidLicense()
+                .TransitionTo(Suspended),
+            When(PaymentFailed)
+                .PaymentFailed()
+                .TransitionTo(Suspended));
 
-            Event(() => LicenseVerificationFailed, x =>
-            {
-                x.CorrelateById(m => m.Message.SubmissionId);
-            });
+        During(Suspended,
+            When(EventRegistrationReceived)
+                .Initialize()
+                .InitiateProcessing()
+                .TransitionTo(Received));
 
-            Event(() => PaymentFailed, x =>
-            {
-                x.CorrelateById(m => m.Message.SubmissionId);
-            });
+        DuringAny(
+            When(RegistrationStatusRequested)
+                .Respond(x => new RegistrationStatus
+                {
+                    SubmissionId = x.Saga.CorrelationId,
+                    ParticipantEmailAddress = x.Saga.ParticipantEmailAddress,
+                    ParticipantCategory = x.Saga.ParticipantCategory,
+                    ParticipantLicenseNumber = x.Saga.ParticipantLicenseNumber,
+                    EventId = x.Saga.EventId,
+                    RaceId = x.Saga.RaceId,
+                    Status = x.Saga.CurrentState
+                })
+        );
+    }
 
-            Initially(
-                When(EventRegistrationReceived)
-                    .Then(Initialize)
-                    .ThenAsync(InitiateProcessing)
-                    .TransitionTo(Received));
+    public State Received { get; private set; }
+    public State Registered { get; private set; }
+    public State Suspended { get; private set; }
 
-            During(Received,
-                When(EventRegistrationCompleted)
-                    .Then(Register)
-                    .TransitionTo(Registered),
-                When(LicenseVerificationFailed)
-                    .Then(InvalidLicense)
-                    .TransitionTo(Suspended),
-                When(PaymentFailed)
-                    .Then(PaymentFailure)
-                    .TransitionTo(Suspended));
+    public Event<RegistrationReceived> EventRegistrationReceived { get; private set; }
+    public Event<GetRegistrationStatus> RegistrationStatusRequested { get; private set; }
+    public Event<RegistrationCompleted> EventRegistrationCompleted { get; private set; }
+    public Event<RegistrationLicenseVerificationFailed> LicenseVerificationFailed { get; private set; }
+    public Event<RegistrationPaymentFailed> PaymentFailed { get; private set; }
+}
 
-            During(Suspended,
-                When(EventRegistrationReceived)
-                    .Then(Initialize)
-                    .ThenAsync(InitiateProcessing)
-                    .TransitionTo(Received));
-        }
 
-        public State Received { get; private set; }
-        public State Registered { get; private set; }
-        public State Suspended { get; private set; }
-
-        public Event<RegistrationReceived> EventRegistrationReceived { get; private set; }
-        public Event<RegistrationCompleted> EventRegistrationCompleted { get; private set; }
-        public Event<RegistrationLicenseVerificationFailed> LicenseVerificationFailed { get; private set; }
-        public Event<RegistrationPaymentFailed> PaymentFailed { get; private set; }
-
-        void Initialize(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
+static class RegistrationStateMachineBehaviorExtensions
+{
+    public static EventActivityBinder<RegistrationState, RegistrationReceived> Initialize(
+        this EventActivityBinder<RegistrationState, RegistrationReceived> binder)
+    {
+        return binder.Then(context =>
         {
-            InitializeInstance(context.Instance, context.Data);
-        }
+            context.Saga.ParticipantEmailAddress = context.Message.ParticipantEmailAddress;
+            context.Saga.ParticipantLicenseNumber = context.Message.ParticipantLicenseNumber;
+            context.Saga.ParticipantCategory = context.Message.ParticipantCategory;
 
-        void Register(BehaviorContext<RegistrationStateInstance, RegistrationCompleted> context)
-        {
-            _logger.LogInformation("Registered: {0} ({1})", context.Data.SubmissionId, context.Instance.ParticipantEmailAddress);
-        }
+            context.Saga.EventId = context.Message.EventId;
+            context.Saga.RaceId = context.Message.RaceId;
 
-        void InvalidLicense(BehaviorContext<RegistrationStateInstance, RegistrationLicenseVerificationFailed> context)
-        {
-            _logger.LogInformation("Invalid License: {0} ({1}) - {2}", context.Data.SubmissionId, context.Instance.ParticipantLicenseNumber,
-                context.Data.ExceptionInfo.Message);
-        }
+            LogContext.Info?.Log("Processing: {0} ({1})", context.Message.SubmissionId, context.Message.ParticipantEmailAddress);
+        });
+    }
 
-        void PaymentFailure(BehaviorContext<RegistrationStateInstance, RegistrationPaymentFailed> context)
-        {
-            _logger.LogInformation("Payment Failed: {0} ({1}) - {2}", context.Data.SubmissionId, context.Instance.ParticipantEmailAddress,
-                context.Data.ExceptionInfo.Message);
-        }
+    public static EventActivityBinder<RegistrationState, RegistrationReceived> InitiateProcessing(
+        this EventActivityBinder<RegistrationState, RegistrationReceived> binder)
+    {
+        return binder.PublishAsync(context => context.Init<ProcessRegistration>(context.Message));
+    }
 
-        async Task InitiateProcessing(BehaviorContext<RegistrationStateInstance, RegistrationReceived> context)
-        {
-            var registration = CreateProcessRegistration(context.Data);
+    public static EventActivityBinder<RegistrationState, RegistrationCompleted> Registered(
+        this EventActivityBinder<RegistrationState, RegistrationCompleted> binder)
+    {
+        return binder.Then(context =>
+            LogContext.Info?.Log("Registered: {0} ({1})", context.Message.SubmissionId, context.Saga.ParticipantEmailAddress));
+    }
 
-            await context.GetPayload<ConsumeContext>().Publish(registration).ConfigureAwait(false);
+    public static EventActivityBinder<RegistrationState, RegistrationLicenseVerificationFailed> InvalidLicense(
+        this EventActivityBinder<RegistrationState, RegistrationLicenseVerificationFailed> binder)
+    {
+        return binder.Then(context =>
+            LogContext.Info?.Log("Invalid License: {0} ({1}) - {2}", context.Message.SubmissionId, context.Saga.ParticipantLicenseNumber,
+                context.Message.ExceptionInfo.Message));
+    }
 
-            _logger.LogInformation("Processing: {0} ({1})", context.Data.SubmissionId, context.Data.ParticipantEmailAddress);
-        }
-
-        void InitializeInstance(RegistrationStateInstance instance, RegistrationReceived data)
-        {
-            _logger.LogInformation("Initializing: {0} ({1})", data.SubmissionId, data.ParticipantEmailAddress);
-
-            instance.ParticipantEmailAddress = data.ParticipantEmailAddress;
-            instance.ParticipantLicenseNumber = data.ParticipantLicenseNumber;
-            instance.ParticipantCategory = data.ParticipantCategory;
-
-            instance.EventId = data.EventId;
-            instance.RaceId = data.RaceId;
-        }
-
-        static ProcessRegistration CreateProcessRegistration(RegistrationReceived message)
-        {
-            return new Process(message.SubmissionId, message.ParticipantEmailAddress, message.ParticipantLicenseNumber, message.ParticipantCategory,
-                message.EventId, message.RaceId, message.CardNumber);
-        }
-
-
-        class Process :
-            ProcessRegistration
-        {
-            public Process(Guid submissionId, string participantEmailAddress, string participantLicenseNumber, string participantCategory, string eventId,
-                string raceId, string cardNumber)
-            {
-                SubmissionId = submissionId;
-                ParticipantEmailAddress = participantEmailAddress;
-                ParticipantLicenseNumber = participantLicenseNumber;
-                ParticipantCategory = participantCategory;
-                EventId = eventId;
-                RaceId = raceId;
-                CardNumber = cardNumber;
-
-                Timestamp = DateTime.UtcNow;
-            }
-
-            public Guid SubmissionId { get; }
-            public DateTime Timestamp { get; }
-            public string ParticipantEmailAddress { get; }
-            public string ParticipantLicenseNumber { get; }
-            public string ParticipantCategory { get; }
-            public string EventId { get; }
-            public string RaceId { get; }
-            public string CardNumber { get; }
-        }
+    public static EventActivityBinder<RegistrationState, RegistrationPaymentFailed> PaymentFailed(
+        this EventActivityBinder<RegistrationState, RegistrationPaymentFailed> binder)
+    {
+        return binder.Then(context =>
+            LogContext.Info?.Log("Payment Failed: {0} ({1}) - {2}", context.Message.SubmissionId, context.Saga.ParticipantEmailAddress,
+                context.Message.ExceptionInfo.Message));
     }
 }

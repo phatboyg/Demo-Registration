@@ -1,17 +1,20 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-    <LangVersion>9.0</LangVersion>
+    <TargetFramework>net7.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="MassTransit" Version="7.2.1" />
-    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="7.2.1" />
+    <PackageReference Include="MassTransit" Version="8.0.9" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.0.9" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Registration.Components\Registration.Components.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models" />
   </ItemGroup>
 </Project>
 

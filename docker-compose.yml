@@ -1,14 +1,14 @@
 version: "3"
 services:
   rabbitmq:
-    image: masstransit/rabbitmq
+    image: masstransit/rabbitmq:latest
     ports:
      - "5672:5672"
      - "15672:15672"
   mssql:
-    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
-    ports:
-     - "1433:1433"
+    image: "mcr.microsoft.com/azure-sql-edge:latest"
     environment:
-      SA_PASSWORD: "DemoRegistration12!"
-      ACCEPT_EULA: "Y"
+      - "ACCEPT_EULA=Y"
+      - "SA_PASSWORD=DemoRegistration12!"
+    ports:
+      - "1433:1433"

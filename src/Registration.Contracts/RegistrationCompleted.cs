@@ -1,12 +1,10 @@
-﻿namespace Registration.Contracts
+﻿namespace Registration.Contracts;
+
+using System;
+
+
+public record RegistrationCompleted
 {
-    using System;
-
-
-    public interface RegistrationCompleted
-    {
-        Guid SubmissionId { get; }
-        DateTime Timestamp { get; }
-        Guid TrackingNumber { get; }
-    }
+    public Guid SubmissionId { get; init; }
+    public Guid TrackingNumber { get; init; }
 }

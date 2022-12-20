@@ -1,14 +1,12 @@
-namespace Registration.Contracts
+namespace Registration.Contracts;
+
+using System;
+using MassTransit;
+
+
+public record RegistrationPaymentFailed
 {
-    using System;
-    using MassTransit;
+    public Guid SubmissionId { get; init; }
 
-
-    public interface RegistrationPaymentFailed
-    {
-        Guid SubmissionId { get; }
-        DateTime Timestamp { get; }
-
-        ExceptionInfo ExceptionInfo { get; }
-    }
+    public ExceptionInfo ExceptionInfo { get; init; }
 }

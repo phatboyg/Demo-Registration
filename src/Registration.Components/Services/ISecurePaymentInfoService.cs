@@ -1,10 +1,9 @@
-﻿namespace Registration.Components.Services
+﻿namespace Registration.Components.Services;
+
+using Contracts;
+
+
+public interface ISecurePaymentInfoService
 {
-    using Contracts;
-
-
-    public interface ISecurePaymentInfoService
-    {
-        SecurePaymentInfo GetPaymentInfo(string emailAddress, string cardNumber);
-    }
+    SecurePaymentInfo GetPaymentInfo(string emailAddress, string cardNumber);
 }
