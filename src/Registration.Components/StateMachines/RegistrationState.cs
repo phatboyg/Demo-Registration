@@ -12,6 +12,7 @@ public class RegistrationState :
     public string ParticipantCategory { get; set; }
 
     public DateTime? ParticipantLicenseExpirationDate { get; set; }
+    public Guid? RegistrationId { get; set; }
 
     public string EventId { get; set; }
     public string RaceId { get; set; }

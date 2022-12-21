@@ -37,14 +37,19 @@ public class ProcessRegistrationConsumer :
     {
         var builder = new RoutingSlipBuilder(NewId.NextGuid());
 
+        builder.SetVariables(new
+        {
+            context.Message.ParticipantEmailAddress,
+            context.Message.ParticipantLicenseNumber,
+            context.Message.ParticipantCategory,
+        });
+
         if (!string.IsNullOrWhiteSpace(context.Message.ParticipantLicenseNumber))
         {
             builder.AddActivity("LicenseVerification", GetActivityAddress<LicenseVerificationActivity, LicenseVerificationArguments>(),
                 new
                 {
-                    LicenseNumber = context.Message.ParticipantLicenseNumber,
                     EventType = "Road",
-                    Category = context.Message.ParticipantCategory
                 });
 
             builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.ActivityFaulted, RoutingSlipEventContents.None, "LicenseVerification",
@@ -54,9 +59,6 @@ public class ProcessRegistrationConsumer :
         builder.AddActivity("EventRegistration", GetActivityAddress<EventRegistrationActivity, EventRegistrationArguments>(),
             new
             {
-                context.Message.ParticipantEmailAddress,
-                context.Message.ParticipantLicenseNumber,
-                context.Message.ParticipantCategory,
                 context.Message.EventId,
                 context.Message.RaceId
             });

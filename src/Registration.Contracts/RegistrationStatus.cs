@@ -8,4 +8,5 @@ public record RegistrationStatus :
 {
     public string Status { get; init; }
     public DateTime? ParticipantLicenseExpirationDate { get; init; }
+    public Guid? RegistrationId { get; init; }
 }

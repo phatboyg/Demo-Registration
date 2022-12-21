@@ -54,6 +54,8 @@ var host = Host.CreateDefaultBuilder(args)
                 cfg.ConfigureEndpoints(context);
             });
         });
+
+        services.AddOpenTelemetry("Registration.Service");
     }).Build();
 
 await host.RunAsync();

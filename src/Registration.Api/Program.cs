@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using Registration.Components;
 using Serilog;
 using Serilog.Events;
 
@@ -37,12 +38,15 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
+
 builder.Services.AddMassTransit(x =>
 {
     x.SetKebabCaseEndpointNameFormatter();
 
     x.UsingRabbitMq();
 });
+
+builder.Services.AddOpenTelemetry("Registration.Api");
 
 builder.Services.AddOptions<MassTransitHostOptions>()
     .Configure(options =>

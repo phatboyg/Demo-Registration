@@ -1,5 +1,6 @@
 ﻿namespace Registration.Components.Activities;
 
+using System;
 using System.Threading.Tasks;
 using MassTransit;
 using Microsoft.Extensions.Logging;
@@ -17,28 +18,42 @@ public class EventRegistrationActivity :
 
     public async Task<ExecutionResult> Execute(ExecuteContext<EventRegistrationArguments> context)
     {
-        _logger.LogInformation("Registering for event: {0} ({1})", context.Arguments.EventId, context.Arguments.ParticipantEmailAddress);
+        var arguments = context.Arguments;
 
-        const decimal registrationTotal = 25.00m;
+        _logger.LogInformation("Registering for event: {EventId} ({Email})", arguments.EventId, arguments.ParticipantEmailAddress);
 
-        await Task.Delay(100);
+        decimal registrationTotal = 25.00m;
 
-        var registrationId = NewId.NextGuid();
+        if (!string.IsNullOrWhiteSpace(arguments.ParticipantLicenseNumber))
+        {
+            _logger.LogInformation("Participant Detail: {LicenseNumber} ({LicenseExpiration}) {Category}",
+                arguments.ParticipantLicenseNumber, arguments.ParticipantLicenseExpirationDate, arguments.ParticipantCategory);
 
-        _logger.LogInformation("Registered for event: {RegistrationId} ({Email})", registrationId, context.Arguments.ParticipantEmailAddress);
+            registrationTotal = 15.0m;
+        }
+
+        await Task.Delay(10);
+
+        Guid? registrationId = NewId.NextGuid();
+
+        _logger.LogInformation("Registered for event: {RegistrationId} ({Email})", registrationId, arguments.ParticipantEmailAddress);
 
         return context.CompletedWithVariables(new
         {
             registrationId,
-            context.Arguments.ParticipantEmailAddress
-        }, new { Amount = registrationTotal });
+            arguments.ParticipantEmailAddress
+        }, new
+        {
+            registrationId,
+            Amount = registrationTotal
+        });
     }
 
     public async Task<CompensationResult> Compensate(CompensateContext<EventRegistrationLog> context)
     {
         _logger.LogInformation("Removing registration for event: {RegistrationId} ({Email})", context.Log.RegistrationId, context.Log.ParticipantEmailAddress);
 
-        await Task.Delay(100);
+        await Task.Delay(10);
 
         return context.Compensated();
     }

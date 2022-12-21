@@ -18,12 +18,16 @@ public class LicenseVerificationActivity :
 
     public async Task<ExecutionResult> Execute(ExecuteContext<LicenseVerificationArguments> context)
     {
-        _logger.LogInformation("Verifying license: {LicenseNumber}", context.Arguments.ParticipantLicenseNumber);
+        var arguments = context.Arguments;
 
-        await Task.Delay(100);
+        var licenseNumber = arguments.ParticipantLicenseNumber;
 
-        if (context.Arguments.ParticipantLicenseNumber == "8675309")
-            throw new RoutingSlipException($"The license number is invalid: {context.Arguments.ParticipantLicenseNumber}");
+        _logger.LogInformation("Verifying license: {LicenseNumber} {Category}/{EventType}", licenseNumber, arguments.ParticipantCategory, arguments.EventType);
+
+        await Task.Delay(10);
+
+        if (licenseNumber == "8675309")
+            throw new RoutingSlipException($"The license number is invalid: {licenseNumber}");
 
         DateTime? expirationDate = DateTime.Today + TimeSpan.FromDays(90);
 

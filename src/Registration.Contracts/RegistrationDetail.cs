@@ -1,8 +1,10 @@
 namespace Registration.Contracts;
 
 using System;
+using MassTransit;
 
 
+[ExcludeFromTopology]
 public record RegistrationDetail
 {
     public Guid SubmissionId { get; init; }

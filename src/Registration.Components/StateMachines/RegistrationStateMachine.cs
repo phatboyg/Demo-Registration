@@ -49,6 +49,7 @@ public class RegistrationStateMachine :
                     ParticipantEmailAddress = x.Saga.ParticipantEmailAddress,
                     ParticipantLicenseNumber = x.Saga.ParticipantLicenseNumber,
                     ParticipantLicenseExpirationDate = x.Saga.ParticipantLicenseExpirationDate,
+                    RegistrationId = x.Saga.RegistrationId,
                     EventId = x.Saga.EventId,
                     RaceId = x.Saga.RaceId,
                     Status = x.Saga.CurrentState
@@ -100,6 +101,7 @@ static class RegistrationStateMachineBehaviorExtensions
             LogContext.Info?.Log("Registered: {0} ({1})", context.Message.SubmissionId, context.Saga.ParticipantEmailAddress);
 
             context.Saga.ParticipantLicenseExpirationDate = context.GetVariable<DateTime>("ParticipantLicenseExpirationDate");
+            context.Saga.RegistrationId = context.GetVariable<Guid>("RegistrationId");
         });
     }
 
