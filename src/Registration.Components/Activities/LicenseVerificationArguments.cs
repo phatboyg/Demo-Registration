@@ -1,19 +1,9 @@
 ﻿namespace Registration.Components.Activities;
 
-public interface LicenseVerificationArguments
+public record LicenseVerificationArguments
 {
     /// <summary>
     /// Racer's license number
     /// </summary>
-    string LicenseNumber { get; }
-
-    /// <summary>
-    /// Road, Cyclocross, MountainBike
-    /// </summary>
-    string EventType { get; }
-
-    /// <summary>
-    /// Category of racer to check
-    /// </summary>
-    string Category { get; }
+    public string ParticipantLicenseNumber { get; init; }
 }

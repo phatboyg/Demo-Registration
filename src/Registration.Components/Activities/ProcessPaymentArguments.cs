@@ -1,11 +1,12 @@
 ﻿namespace Registration.Components.Activities;
 
-public interface ProcessPaymentArguments
+public record ProcessPaymentArguments
 {
-    string CardNumber { get; }
-    string VerificationCode { get; }
-    string CardholderName { get; }
-    int ExpirationMonth { get; }
-    int ExpirationYear { get; }
-    decimal Amount { get; }
+    public string CardNumber { get; init; }
+    public string VerificationCode { get; init; }
+    public string CardholderName { get; init; }
+    public int ExpirationMonth { get; init; }
+    public int ExpirationYear { get; init; }
+
+    public decimal Amount { get; init; }
 }

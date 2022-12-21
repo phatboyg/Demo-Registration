@@ -14,6 +14,7 @@ public class RegistrationStateInstanceMap :
         entity.Property(x => x.ParticipantEmailAddress);
         entity.Property(x => x.ParticipantCategory);
         entity.Property(x => x.ParticipantLicenseNumber);
+        entity.Property(x => x.ParticipantLicenseExpirationDate);
         entity.Property(x => x.EventId);
         entity.Property(x => x.RaceId);
     }

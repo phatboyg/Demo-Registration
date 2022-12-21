@@ -3,20 +3,20 @@
 using System;
 
 
-public interface ProcessPaymentLog
+public record ProcessPaymentLog
 {
     /// <summary>
     /// The date the charge was processed
     /// </summary>
-    DateTime ChargeDate { get; }
+    public DateTime ChargeDate { get; init; }
 
     /// <summary>
     /// The authorization code received from the payment provider
     /// </summary>
-    string AuthorizationCode { get; }
+    public string AuthorizationCode { get; init; }
 
     /// <summary>
     /// The amount charged
     /// </summary>
-    decimal Amount { get; }
+    public decimal Amount { get; init; }
 }

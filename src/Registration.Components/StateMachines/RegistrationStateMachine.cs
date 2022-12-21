@@ -1,5 +1,6 @@
 ﻿namespace Registration.Components.StateMachines;
 
+using System;
 using Contracts;
 using MassTransit;
 
@@ -46,8 +47,8 @@ public class RegistrationStateMachine :
                 {
                     SubmissionId = x.Saga.CorrelationId,
                     ParticipantEmailAddress = x.Saga.ParticipantEmailAddress,
-                    ParticipantCategory = x.Saga.ParticipantCategory,
                     ParticipantLicenseNumber = x.Saga.ParticipantLicenseNumber,
+                    ParticipantLicenseExpirationDate = x.Saga.ParticipantLicenseExpirationDate,
                     EventId = x.Saga.EventId,
                     RaceId = x.Saga.RaceId,
                     Status = x.Saga.CurrentState
@@ -95,7 +96,11 @@ static class RegistrationStateMachineBehaviorExtensions
         this EventActivityBinder<RegistrationState, RegistrationCompleted> binder)
     {
         return binder.Then(context =>
-            LogContext.Info?.Log("Registered: {0} ({1})", context.Message.SubmissionId, context.Saga.ParticipantEmailAddress));
+        {
+            LogContext.Info?.Log("Registered: {0} ({1})", context.Message.SubmissionId, context.Saga.ParticipantEmailAddress);
+
+            context.Saga.ParticipantLicenseExpirationDate = context.GetVariable<DateTime>("ParticipantLicenseExpirationDate");
+        });
     }
 
     public static EventActivityBinder<RegistrationState, RegistrationLicenseVerificationFailed> InvalidLicense(

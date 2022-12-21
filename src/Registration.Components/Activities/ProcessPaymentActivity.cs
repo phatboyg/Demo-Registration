@@ -18,38 +18,27 @@ public class ProcessPaymentActivity :
 
     public async Task<ExecutionResult> Execute(ExecuteContext<ProcessPaymentArguments> context)
     {
-        _logger.LogInformation("Processing Payment: {0}", context.Arguments.Amount);
+        _logger.LogInformation("Processing Payment: {Amount}", context.Arguments.Amount);
 
         if (context.Arguments.CardNumber == "4147")
             throw new RoutingSlipException("The card number is invalid");
 
-        await Task.Delay(100);
+        await Task.Delay(10);
 
-        var authorizationCode = "ABC123";
+        const string authorizationCode = "ABC123";
 
-        return context.Completed(new Log(authorizationCode, context.Arguments.Amount));
+        return context.Completed(new
+        {
+            ChargeDate = DateTime.UtcNow,
+            authorizationCode,
+            context.Arguments.Amount,
+        });
     }
 
     public async Task<CompensationResult> Compensate(CompensateContext<ProcessPaymentLog> context)
     {
-        await Task.Delay(100);
+        await Task.Delay(10);
 
         return context.Compensated();
-    }
-
-
-    class Log :
-        ProcessPaymentLog
-    {
-        public Log(string authorizationCode, decimal amount)
-        {
-            AuthorizationCode = authorizationCode;
-            Amount = amount;
-            ChargeDate = DateTime.Today;
-        }
-
-        public DateTime ChargeDate { get; }
-        public string AuthorizationCode { get; }
-        public decimal Amount { get; }
     }
 }

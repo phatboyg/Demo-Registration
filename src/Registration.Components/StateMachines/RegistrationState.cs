@@ -11,6 +11,8 @@ public class RegistrationState :
     public string ParticipantLicenseNumber { get; set; }
     public string ParticipantCategory { get; set; }
 
+    public DateTime? ParticipantLicenseExpirationDate { get; set; }
+
     public string EventId { get; set; }
     public string RaceId { get; set; }
 

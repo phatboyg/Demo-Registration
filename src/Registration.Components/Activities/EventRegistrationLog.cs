@@ -3,8 +3,8 @@
 using System;
 
 
-public interface EventRegistrationLog
+public record EventRegistrationLog
 {
-    Guid RegistrationId { get; }
-    string ParticipantEmailAddress { get; }
+    public Guid RegistrationId { get; init; }
+    public string ParticipantEmailAddress { get; init; }
 }
