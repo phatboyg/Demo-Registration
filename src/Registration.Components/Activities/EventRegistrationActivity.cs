@@ -10,10 +10,12 @@ public class EventRegistrationActivity :
     IActivity<EventRegistrationArguments, EventRegistrationLog>
 {
     readonly ILogger<EventRegistrationActivity> _logger;
+    readonly IEndpointAddressProvider _provider;
 
-    public EventRegistrationActivity(ILogger<EventRegistrationActivity> logger)
+    public EventRegistrationActivity(ILogger<EventRegistrationActivity> logger, IEndpointAddressProvider provider)
     {
         _logger = logger;
+        _provider = provider;
     }
 
     public async Task<ExecutionResult> Execute(ExecuteContext<EventRegistrationArguments> context)
@@ -22,7 +24,7 @@ public class EventRegistrationActivity :
 
         _logger.LogInformation("Registering for event: {EventId} ({Email})", arguments.EventId, arguments.ParticipantEmailAddress);
 
-        decimal registrationTotal = 25.00m;
+        var registrationTotal = 25.00m;
 
         if (!string.IsNullOrWhiteSpace(arguments.ParticipantLicenseNumber))
         {
@@ -38,15 +40,32 @@ public class EventRegistrationActivity :
 
         _logger.LogInformation("Registered for event: {RegistrationId} ({Email})", registrationId, arguments.ParticipantEmailAddress);
 
+        var log = new EventRegistrationLog
+        {
+            RegistrationId = registrationId.Value,
+            ParticipantEmailAddress = arguments.ParticipantEmailAddress
+        };
+
+        var variables = new
+        {
+            registrationId,
+            Amount = registrationTotal
+        };
+
+        if (arguments.EventId?.StartsWith("DANGER") ?? false)
+        {
+            return context.ReviseItinerary(log, variables, x =>
+            {
+                x.AddActivitiesFromSourceItinerary();
+                x.AddActivity("Assign Waiver", _provider.GetExecuteEndpoint<AssignWaiverActivity, AssignWaiverArguments>());
+            });
+        }
+
         return context.CompletedWithVariables(new
         {
             registrationId,
             arguments.ParticipantEmailAddress
-        }, new
-        {
-            registrationId,
-            Amount = registrationTotal
-        });
+        }, variables);
     }
 
     public async Task<CompensationResult> Compensate(CompensateContext<EventRegistrationLog> context)

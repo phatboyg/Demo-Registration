@@ -22,6 +22,18 @@ public class ProcessPaymentActivity :
 
         if (context.Arguments.CardNumber == "4147")
             throw new RoutingSlipException("The card number is invalid");
+        
+        if(context.Arguments.CardNumber == "187187")
+            throw new TransientException("The payment provider isn't responding");
+
+        if (context.Arguments.CardNumber == "187")
+        {
+            if (context.GetRetryAttempt() == 0 && context.GetRedeliveryCount() == 0)
+                throw new TransientException("The payment provider isn't responding");
+
+            if (context.GetRedeliveryCount() == 0)
+                throw new LongTransientException("The payment provider isn't responding after a long time");
+        }
 
         await Task.Delay(10);
 

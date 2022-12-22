@@ -1,6 +1,5 @@
 ﻿namespace Registration.Components.Consumers;
 
-using System;
 using System.Threading.Tasks;
 using Activities;
 using Contracts;
@@ -13,14 +12,14 @@ using Services;
 public class ProcessRegistrationConsumer :
     IConsumer<ProcessRegistration>
 {
-    readonly IEndpointNameFormatter _endpointNameFormatter;
     readonly ILogger<ProcessRegistrationConsumer> _logger;
     readonly ISecurePaymentInfoService _paymentInfoService;
+    readonly IEndpointAddressProvider _provider;
 
-    public ProcessRegistrationConsumer(ILogger<ProcessRegistrationConsumer> logger, IEndpointNameFormatter endpointNameFormatter)
+    public ProcessRegistrationConsumer(ILogger<ProcessRegistrationConsumer> logger, IEndpointAddressProvider provider)
     {
         _logger = logger;
-        _endpointNameFormatter = endpointNameFormatter;
+        _provider = provider;
         _paymentInfoService = new SecurePaymentInfoService();
     }
 
@@ -46,7 +45,7 @@ public class ProcessRegistrationConsumer :
 
         if (!string.IsNullOrWhiteSpace(context.Message.ParticipantLicenseNumber))
         {
-            builder.AddActivity("LicenseVerification", GetActivityAddress<LicenseVerificationActivity, LicenseVerificationArguments>(),
+            builder.AddActivity("LicenseVerification", _provider.GetExecuteEndpoint<LicenseVerificationActivity, LicenseVerificationArguments>(),
                 new
                 {
                     EventType = "Road",
@@ -56,7 +55,7 @@ public class ProcessRegistrationConsumer :
                 x => x.Send<RegistrationLicenseVerificationFailed>(new { context.Message.SubmissionId }));
         }
 
-        builder.AddActivity("EventRegistration", GetActivityAddress<EventRegistrationActivity, EventRegistrationArguments>(),
+        builder.AddActivity("EventRegistration", _provider.GetExecuteEndpoint<EventRegistrationActivity, EventRegistrationArguments>(),
             new
             {
                 context.Message.EventId,
@@ -65,7 +64,7 @@ public class ProcessRegistrationConsumer :
 
         var paymentInfo = _paymentInfoService.GetPaymentInfo(context.Message.ParticipantEmailAddress, context.Message.CardNumber);
 
-        builder.AddActivity("ProcessPayment", GetActivityAddress<ProcessPaymentActivity, ProcessPaymentArguments>(), paymentInfo);
+        builder.AddActivity("ProcessPayment", _provider.GetExecuteEndpoint<ProcessPaymentActivity, ProcessPaymentArguments>(), paymentInfo);
 
         builder.AddSubscription(context.SourceAddress, RoutingSlipEvents.ActivityFaulted, RoutingSlipEventContents.None, "ProcessPayment",
             x => x.Send<RegistrationPaymentFailed>(new { context.Message.SubmissionId }));
@@ -74,14 +73,5 @@ public class ProcessRegistrationConsumer :
             x => x.Send<RegistrationCompleted>(new { context.Message.SubmissionId }));
 
         return builder.Build();
-    }
-
-    Uri GetActivityAddress<TActivity, TArguments>()
-        where TActivity : class, IExecuteActivity<TArguments>
-        where TArguments : class
-    {
-        var name = _endpointNameFormatter.ExecuteActivity<TActivity, TArguments>();
-
-        return new Uri($"exchange:{name}");
     }
 }

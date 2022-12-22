@@ -1,3 +1,4 @@
+using System;
 using System.Reflection;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +36,8 @@ var host = Host.CreateDefaultBuilder(args)
             });
         });
 
+        services.AddSingleton<IEndpointAddressProvider, RabbitMqEndpointAddressProvider>();
+
         services.AddMassTransit(x =>
         {
             x.SetKebabCaseEndpointNameFormatter();
@@ -43,6 +46,28 @@ var host = Host.CreateDefaultBuilder(args)
             {
                 r.ExistingDbContext<RegistrationDbContext>();
                 r.UseSqlServer();
+            });
+
+            x.AddConfigureEndpointsCallback((_, _, cfg) =>
+            {
+                cfg.UseDelayedRedelivery(r =>
+                {
+                    r.Handle<LongTransientException>();
+                    r.Interval(500, 1000);
+                });
+                
+                cfg.UseKillSwitch(options => options
+                    .SetActivationThreshold(1)
+                    .SetTrackingPeriod(TimeSpan.FromMinutes(1))
+                    .SetTripThreshold(0.15)
+                    .SetRestartTimeout(m: 1)
+                    .SetExceptionFilter(e => e.Handle<TransientException>()));
+                
+                cfg.UseMessageRetry(r =>
+                {
+                    r.Handle<TransientException>();
+                    r.Interval(25, 50);
+                });
             });
 
             x.AddConsumersFromNamespaceContaining<ComponentsNamespace>();
