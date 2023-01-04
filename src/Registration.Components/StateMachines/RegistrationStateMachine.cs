@@ -18,6 +18,15 @@ public class RegistrationStateMachine :
             x.OnMissingInstance(m => m.Fault());
         });
 
+        Schedule(() => RetryDelayExpired, saga => saga.ScheduleRetryToken, x =>
+        {
+            x.Received = r =>
+            {
+                r.CorrelateById(context => context.Message.RegistrationId);
+                r.ConfigureConsumeTopology = false;
+            };
+        });
+
         Initially(
             When(EventRegistrationReceived)
                 .Initialize()
@@ -41,6 +50,11 @@ public class RegistrationStateMachine :
                 .InitiateProcessing()
                 .TransitionTo(Received));
 
+        During(WaitingToRetry,
+            When(RetryDelayExpired.Received)
+                .RetryProcessing()
+                .TransitionTo(Received));
+
         DuringAny(
             When(RegistrationStatusRequested)
                 .Respond(x => new RegistrationStatus
@@ -55,17 +69,32 @@ public class RegistrationStateMachine :
                     Status = x.Saga.CurrentState
                 })
         );
-    }
 
-    public State Received { get; private set; }
-    public State Registered { get; private set; }
-    public State Suspended { get; private set; }
+        // could easily be configured via options
+        const int retryCount = 5;
+        var retryDelay = TimeSpan.FromSeconds(10);
 
-    public Event<RegistrationReceived> EventRegistrationReceived { get; private set; }
-    public Event<GetRegistrationStatus> RegistrationStatusRequested { get; private set; }
-    public Event<RegistrationCompleted> EventRegistrationCompleted { get; private set; }
-    public Event<RegistrationLicenseVerificationFailed> LicenseVerificationFailed { get; private set; }
-    public Event<RegistrationPaymentFailed> PaymentFailed { get; private set; }
+        WhenEnter(Suspended, x => x
+            .If(context => context.Saga.RetryAttempt < retryCount,
+                retry => retry
+                    .Schedule(RetryDelayExpired, context => new RetryDelayExpired(context.Saga.CorrelationId), _ => retryDelay)
+                    .TransitionTo(WaitingToRetry)
+            )
+        );
+    } // ReSharper disable UnassignedGetOnlyAutoProperty
+    // ReSharper disable MemberCanBePrivate.Global
+    public State Received { get; }
+    public State Registered { get; }
+    public State WaitingToRetry { get; }
+    public State Suspended { get; }
+
+    public Event<RegistrationReceived> EventRegistrationReceived { get; }
+    public Event<GetRegistrationStatus> RegistrationStatusRequested { get; }
+    public Event<RegistrationCompleted> EventRegistrationCompleted { get; }
+    public Event<RegistrationLicenseVerificationFailed> LicenseVerificationFailed { get; }
+    public Event<RegistrationPaymentFailed> PaymentFailed { get; }
+
+    public Schedule<RegistrationState, RetryDelayExpired> RetryDelayExpired { get; }
 }
 
 
@@ -93,6 +122,24 @@ static class RegistrationStateMachineBehaviorExtensions
         return binder.PublishAsync(context => context.Init<ProcessRegistration>(context.Message));
     }
 
+    public static EventActivityBinder<RegistrationState, RetryDelayExpired> RetryProcessing(
+        this EventActivityBinder<RegistrationState, RetryDelayExpired> binder)
+    {
+        return binder
+            .Then(context => context.Saga.RetryAttempt++)
+            .PublishAsync(context => context.Init<ProcessRegistration>(new
+            {
+                SubmissionId = context.Saga.CorrelationId,
+                context.Saga.ParticipantEmailAddress,
+                context.Saga.ParticipantLicenseNumber,
+                context.Saga.ParticipantCategory,
+                context.Saga.CardNumber,
+                context.Saga.EventId,
+                context.Saga.RaceId,
+                __Header_Registration_RetryAttempt = context.Saga.RetryAttempt
+            }));
+    }
+
     public static EventActivityBinder<RegistrationState, RegistrationCompleted> Registered(
         this EventActivityBinder<RegistrationState, RegistrationCompleted> binder)
     {
@@ -109,15 +156,23 @@ static class RegistrationStateMachineBehaviorExtensions
         this EventActivityBinder<RegistrationState, RegistrationLicenseVerificationFailed> binder)
     {
         return binder.Then(context =>
+        {
             LogContext.Info?.Log("Invalid License: {0} ({1}) - {2}", context.Message.SubmissionId, context.Saga.ParticipantLicenseNumber,
-                context.Message.ExceptionInfo.Message));
+                context.Message.ExceptionInfo.Message);
+
+            context.Saga.Reason = "Invalid License";
+        });
     }
 
     public static EventActivityBinder<RegistrationState, RegistrationPaymentFailed> PaymentFailed(
         this EventActivityBinder<RegistrationState, RegistrationPaymentFailed> binder)
     {
         return binder.Then(context =>
+        {
             LogContext.Info?.Log("Payment Failed: {0} ({1}) - {2}", context.Message.SubmissionId, context.Saga.ParticipantEmailAddress,
-                context.Message.ExceptionInfo.Message));
+                context.Message.ExceptionInfo.Message);
+
+            context.Saga.Reason = "Payment Failed";
+        });
     }
 }

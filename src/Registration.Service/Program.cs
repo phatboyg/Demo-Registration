@@ -76,6 +76,8 @@ var host = Host.CreateDefaultBuilder(args)
 
             x.UsingRabbitMq((context, cfg) =>
             {
+                cfg.UseDelayedMessageScheduler();
+                
                 cfg.ConfigureEndpoints(context);
             });
         });
