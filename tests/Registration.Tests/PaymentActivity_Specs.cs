@@ -73,6 +73,7 @@ public class When_a_payment_activity
             .AddMassTransitTestHarness(x =>
             {
                 x.SetKebabCaseEndpointNameFormatter();
+                x.AddSingleton<IEndpointAddressProvider, RabbitMqEndpointAddressProvider>();
 
                 x.AddConsumersFromNamespaceContaining<ComponentsNamespace>();
                 x.AddActivitiesFromNamespaceContaining<ComponentsNamespace>();
